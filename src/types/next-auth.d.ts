@@ -1,6 +1,6 @@
 import "next-auth";
 import { DefaultSession } from "next-auth";
-
+// redefine types to include custom fields in session and jwt token
 declare module "next-auth" {
   interface Session {
     user: {
@@ -8,7 +8,7 @@ declare module "next-auth" {
       isVerified?: boolean;
       isAcceptingMessages?: boolean;
       username?: string;
-    } & DefaultSession["user"];
+    } & DefaultSession["user"]; 
   }
 
   interface User {

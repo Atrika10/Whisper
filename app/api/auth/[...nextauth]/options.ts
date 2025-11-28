@@ -49,8 +49,11 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
+  // we're using jwt strategy, so we need to define callbacks to include extra user info in the token & session 
+
   callbacks: {
     async jwt({ token, user }) {
+      // Include extra user info in the token 
       if (user) {
         token._id = user._id?.toString(); 
         token.isVerified = user.isVerified;
