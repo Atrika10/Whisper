@@ -3,6 +3,7 @@ import UserModel from "@/src/Model/User";
 import { usernameValidation } from "@/src/Schemas/signUpSchema";
 import z, { success } from "zod";
 
+// here in usernameQuerySchema we are validating only username from query params
 const usernameQuerySchema = z.object({
   username: usernameValidation,
 });
