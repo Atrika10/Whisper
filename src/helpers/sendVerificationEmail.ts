@@ -8,8 +8,10 @@ export async function sendVerificationEmail(
   verifyCode: string
 ): Promise<ApiResponse> {
   try {
+    console.log(`Sending verification email to: ${email}`);
     await resend.emails.send({
-      from: 'atrikashow@gmail.com',
+      // For testing, use the default Resend address.
+      from: 'onboarding@resend.dev',
       to: email,
       subject: 'Whisper Message Verification Code',
       react: VerificationEmail({ username, otp: verifyCode }),
