@@ -2,7 +2,7 @@ import { sendVerificationEmail } from "@/src/helpers/sendVerificationEmail";
 import dbConnect from "@/src/lib/dbConnect";
 import UserModel from "@/src/Model/User";
 import bcrypt from "bcryptjs";
-import { success } from "zod";
+import { signUpSchema } from "@/src/Schemas/signUpSchema";
 
 // import sendverificationEmail from "@/src/lib/sendVerificationEmail";
 
@@ -10,7 +10,18 @@ export async function POST(request: Request) {
   await dbConnect();
 
   try {
-    const { username, email, password } = await request.json();
+    const body = await request.json();
+    const result = signUpSchema.safeParse(body);
+
+    if (!result.success) {
+      const errorMessage = result.error;
+      return Response.json(
+        { success: false, message: errorMessage },
+        { status: 400 }
+      );
+    }
+
+    const { username, email, password } = result.data;
 
     const existingVerifiedUserByUsername = await UserModel.findOne({
         username,

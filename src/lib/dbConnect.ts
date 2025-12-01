@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+const DB_NAME = 'whisper';
 type ConnectionObject = {
   isConnected?: number;
 };
@@ -13,7 +13,7 @@ async function dbConnect(): Promise<void> {
   }
 
   try {
-    const db = await mongoose.connect(process.env.MONGODB_URI || "", {});
+    const db = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}` || "", {});
 
     console.log("db details", db);
     console.log("db connections details", db.connections);
