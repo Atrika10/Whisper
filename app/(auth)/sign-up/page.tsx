@@ -1,13 +1,82 @@
 "use client"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
+import {zodResolver} from '@hookform/resolvers/zod'
 import { Ghost, User, Mail, Lock, ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+import { useForm } from "react-hook-form"
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useRouter } from "next/navigation"
+import z from "zod"
+import axios, { AxiosError } from 'axios';
+import { signUpSchema } from "@/src/Schemas/signUpSchema"
+import { ApiResponse } from "@/src/types/ApiResponse"
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 function page() {
+  const [username, setUsername] = useState('');
+  const [usernameMessage, setUsernameMessage] = useState('');
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const debouncedUsername = useDebounce(username, 500);
+
+  const router = useRouter();
+  
+  const form = useForm<z.infer<typeof signUpSchema>>({
+    resolver : zodResolver(signUpSchema), 
+    defaultValues : {
+      username: '',
+      email: '',
+      password: ''
+    }
+  });
+
+  useEffect(()=>{
+    const checkUsernameUnique = async ()=>{
+     if(debouncedUsername){
+      setIsCheckingUsername(true);
+      setUsernameMessage('');
+
+      try {
+        const response = await axios.get<ApiResponse>(`/api/check-unique-username?username=${debouncedUsername}`);
+        console.log(response, "Username check response");
+
+        if(response.data.success){
+          setUsernameMessage('Username is available');
+        }
+        
+      } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>;
+        if(axiosError.response){
+          setUsernameMessage(axiosError.response?.data.message ?? 'Error checking username');
+        }else{
+          setUsernameMessage('Error checking username');
+        }
+      }finally{
+        setIsCheckingUsername(false);
+      }
+     }
+    };
+    checkUsernameUnique();
+  }, [debouncedUsername]);
+
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-white/20">
       {/* Background Effects */}
