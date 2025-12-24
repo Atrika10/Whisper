@@ -39,6 +39,7 @@ function page() {
 
   const router = useRouter();
   
+  // Initialize the form with react-hook-form and zod resolver
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver : zodResolver(signUpSchema), 
     defaultValues : {
@@ -76,6 +77,27 @@ function page() {
     };
     checkUsernameUnique();
   }, [debouncedUsername]);
+
+  const onSubmit = async (data: z.infer<typeof signUpSchema>)=>{
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post<ApiResponse>('/api/sign-up', data);
+      console.log(response, "Error in on submit ")
+      if(response.data.success){
+        // use a toast notification to inform user
+        router.replace(`/verify/${username}`)
+        
+      }
+    } catch (error) {
+      console.log("Error in signup of user", error);
+      const axiosError = error as AxiosError<ApiResponse>;
+      let errorMessage = axiosError.response?.data.message ?? 'Error signing up';
+      // use a toast notification here to inform user about the error
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-white/20">
