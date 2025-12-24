@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {zodResolver} from '@hookform/resolvers/zod'
-import { Ghost, User, Mail, Lock, ArrowRight } from "lucide-react"
+import { Ghost, User, Mail, Lock, ArrowRight,Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 import { useForm } from "react-hook-form"
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useRouter } from "next/navigation"
 import z from "zod"
 import axios, { AxiosError } from 'axios';
@@ -165,62 +165,120 @@ function page() {
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="space-y-4"
               >
-                {/* Username Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm text-zinc-300">
-                    Username
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder="anonymous_hero"
-                      className="h-12 pl-10 border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all duration-300"
-                    />
-                  </div>
-                </div>
 
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm text-zinc-300">
-                    Email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      className="h-12 pl-10 border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all duration-300"
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    {/* Username Field */}
+                    <FormField
+                      name="username"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-300">Username</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                              <Input
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  setUsername(e.target.value);
+                                }}
+                                placeholder="anonymous_hero"
+                                className="h-12 pl-10 border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all duration-300"
+                              />
+                              {isCheckingUsername && (
+                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-zinc-500" />
+                              )}
+                            </div>
+                          </FormControl>
+                          {!isCheckingUsername && usernameMessage && (
+                            <p
+                              className={`text-xs ${
+                                usernameMessage === "Username is available"
+                                  ? "text-green-500"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {usernameMessage}
+                            </p>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                  <p className="text-xs text-zinc-500 pl-1">We will send you a verification code</p>
-                </div>
 
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm text-zinc-300">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      className="h-12 pl-10 border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all duration-300"
+                    {/* Email Field */}
+                    <FormField
+                      name="email"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-300">Email</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="you@example.com"
+                                className="h-12 pl-10 border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all duration-300"
+                              />
+                            </div>
+                          </FormControl>
+                          <p className="text-xs text-zinc-500 pl-1">
+                            We will send you a verification code
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                </div>
+
+                    {/* Password Field */}
+                    <FormField
+                      name="password"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-300">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                              <Input
+                                {...field}
+                                type="password"
+                                placeholder="••••••••"
+                                className="h-12 pl-10 border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all duration-300"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
 
                 {/* Submit Button */}
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button className="w-full h-12 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-purple-500/25 group">
-                    Create Account
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </motion.div>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full h-12 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-purple-500/25 group"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
+                          </>
+                        ) : (
+                          <>
+                            Create Account
+                            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                     </form>
+                </Form>
               </motion.div>
 
               {/* Divider */}
